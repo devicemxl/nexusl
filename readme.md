@@ -62,7 +62,7 @@ Esta fase se enfocará en enriquecer la expresividad del lenguaje y su capacidad
 * **Metadatos:** Posibilidad de asociar metadatos a las tripletas (ej. fuente, confianza).
 * **Error Handling y Debugging:** Mecanismos robustos para el manejo de errores y la depuración del código.
 
-## Estructura de Directorios Recomendada
+## Estructura de Directorios Propuesta Inicialmente
 
 La siguiente estructura facilita la modularidad y el desarrollo organizado:
 
