@@ -1,3 +1,3 @@
-module github.com/devicemxl/nexusl/pkg/lexer
+module github.com/devicemxl/nexusl
 
 go 1.24.3
