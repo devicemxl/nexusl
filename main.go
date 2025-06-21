@@ -1,6 +1,6 @@
 package main
 
-import lx "github.com/device/nexsusL/pkg/lexer"
+import lx "github.com/devicemxl/nexusl/pkg/lexer"
 
 func main() {
 	line := "Hello, world! This is a test.\n Let's see how it works."

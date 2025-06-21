@@ -1,4 +1,4 @@
-package main
+package ds
 
 import (
 	"errors" // Importa el paquete errors para manejar errores
@@ -138,15 +138,16 @@ func (s *Entity) CallProc(args ...interface{}) (interface{}, error) {
 	return s.Proc(args...) // Ejecuta el procedimiento con los argumentos dados.
 }
 
+/*
 func main() {
 	// Punto de entrada principal para la demostración de Entity.
 
-	/*
+
 		ESTA ES LA DEFINICION PARA LA ASIGNACION DE FORMULAS
 		Este bloque demuestra cómo un Entidad puede representar una "fórmula"
 		o una "función ejecutable" en el sistema.
 		El Entidad 'doble' se asocia con un procedimiento Go que duplica un número.
-	*/
+
 	fmt.Printf("\nESTA ES LA DEFINICION PARA LA ASIGNACION DE VERBOS (FORMULAS)\n")
 	// Crear un Entidad anónimo para representar la operación "doble".
 	s := NewEntity()
@@ -179,11 +180,11 @@ func main() {
 		fmt.Printf("Result of %s(21) = %v\n", s.PublicName, res)
 	}
 
-	/*
+
 		ESTA ES LA DEFINICION PARA MANEJO DE SUJETOS
 		Este bloque demuestra cómo los Entidades pueden representar "sujetos" o entidades
 		concretas en el sistema, a las que se les pueden asignar propiedades y valores.
-	*/
+
 	fmt.Printf("\nESTA ES LA DEFINICION PARA LA ASIGNACION DE SUJETOS\n")
 	fmt.Println("\n--- Otro Entidad ---")
 
@@ -256,3 +257,4 @@ func main() {
 	fmt.Printf("\n\n\n")
 
 }
+*/
