@@ -62,7 +62,7 @@ Esta fase se enfocará en enriquecer la expresividad del lenguaje y su capacidad
 * **Metadatos:** Posibilidad de asociar metadatos a las tripletas (ej. fuente, confianza).
 * **Error Handling y Debugging:** Mecanismos robustos para el manejo de errores y la depuración del código.
 
-## Estructura de Directorios Recomendada
+## Estructura de Directorios Propuesta Inicialmente
 
 La siguiente estructura facilita la modularidad y el desarrollo organizado:
 
@@ -104,19 +104,3 @@ nexusl/
 ├── go.sum                // Sumas de verificación de módulos
 └── README.md             // Este archivo
 ```
-
-## Próximos Pasos para Empezar
-
-Para iniciar el desarrollo, se recomienda seguir estos pasos:
-
-1.  **Crear la estructura de directorios** descrita arriba.
-2.  **Inicializar el módulo Go:** Ejecutar `go mod init github.com/tu_usuario/nexusl` (reemplaza `tu_usuario` con tu nombre de usuario o el path del repositorio).
-3.  **Definir las estructuras principales:**
-    * En `pkg/object/object.go`: Define la interfaz `Object` y las structs concretas como `NumberObject`, `StringObject`, `BooleanObject`, `SymbolObject`, `TripletaObject`, y `VariableObject`. Estas son las representaciones en tiempo de ejecución de los datos de NexusL.
-    * En `pkg/parser/ast.go`: Define la interfaz `Node` y `Expression`, y las structs para los nodos del Árbol de Sintaxis Abstracta como `Program`, `Tripleta`, `Literal`, `Symbol`, `Variable`, `CallExpression`, etc.
-4.  **Implementar el Léxer (`pkg/lexer/lexer.go`):** Capaz de tokenizar S-expressions básicas (paréntesis, símbolos, números, strings).
-5.  **Implementar el Parser inicial (`pkg/parser/parser.go`):** Que pueda construir un AST para una única tripleta `(sujeto predicado objeto)` y expresiones anidadas simples.
-6.  **Crear un `main.go` simple en `cmd/nexusl/`:** Para leer una línea de entrada, pasarla por el léxer y el parser, e imprimir el AST resultante. Esto servirá para validar las primeras etapas.
-7.  **Empezar a escribir pruebas unitarias** para el léxer y el parser desde el principio, ya que son componentes críticos.
-
-¡Este camino proporcionará una base sólida para construir NexusL de manera robusta y extensible!
