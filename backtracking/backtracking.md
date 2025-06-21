@@ -1,0 +1,2 @@
+person_basic.go backtracking
+person_restrictions.go backtracking variables cualitativas nominales

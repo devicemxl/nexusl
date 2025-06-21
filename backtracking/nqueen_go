@@ -1,0 +1,141 @@
+package main
+
+import "fmt"
+
+// Hecho representa una afirmación simple que se considera verdadera.
+type Hecho struct {
+	Nombre string
+	Args   []int // Usamos int para representar las posiciones en el tablero
+}
+
+// Restricción representa una regla o condición que debe cumplirse.
+type Restriccion struct {
+	Nombre       string
+	SubObjetivos []Hecho // Sub-objetivos o condiciones que deben cumplirse
+}
+
+// BaseConocimiento es una colección de hechos y restricciones.
+type BaseConocimiento struct {
+	Hechos        []Hecho
+	Restricciones []Restriccion
+}
+
+// NuevaBaseConocimiento crea una nueva base de conocimiento.
+func NuevaBaseConocimiento() *BaseConocimiento {
+	return &BaseConocimiento{
+		Hechos:        make([]Hecho, 0),
+		Restricciones: make([]Restriccion, 0),
+	}
+}
+
+// AñadirHecho añade un nuevo hecho a la base de conocimiento.
+func (bc *BaseConocimiento) AñadirHecho(hecho Hecho) {
+	bc.Hechos = append(bc.Hechos, hecho)
+}
+
+// AñadirRestriccion añade una nueva restricción a la base de conocimiento.
+func (bc *BaseConocimiento) AñadirRestriccion(restriccion Restriccion) {
+	bc.Restricciones = append(bc.Restricciones, restriccion)
+}
+
+// ConsultarHecho verifica si un hecho existe en la base de conocimiento.
+func (bc *BaseConocimiento) ConsultarHecho(hecho Hecho) bool {
+	for _, h := range bc.Hechos {
+		if h.Nombre == hecho.Nombre && len(h.Args) == len(hecho.Args) {
+			match := true
+			for i := range h.Args {
+				if h.Args[i] != hecho.Args[i] {
+					match = false
+					break
+				}
+			}
+			if match {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// EvaluarRestriccion evalúa si una restricción se cumple en la base de conocimiento.
+func (bc *BaseConocimiento) EvaluarRestriccion(restriccion Restriccion) bool {
+	for _, subObjetivo := range restriccion.SubObjetivos {
+		if !bc.ConsultarHecho(subObjetivo) {
+			return false
+		}
+	}
+	return true
+}
+
+// Función de backtracking para resolver el problema de las N reinas
+func (bc *BaseConocimiento) ResolverNReinas(n int) bool {
+	return bc.backtrackNReinas(0, n)
+}
+
+// Función auxiliar para el backtracking de las N reinas
+func (bc *BaseConocimiento) backtrackNReinas(fila int, n int) bool {
+	if fila == n {
+		return true
+	}
+	for col := 0; col < n; col++ {
+		if bc.esSeguro(fila, col, n) {
+			bc.AñadirHecho(Hecho{Nombre: "reina", Args: []int{fila, col}})
+			if bc.backtrackNReinas(fila+1, n) {
+				return true
+			}
+			// Si colocar la reina en (fila, col) no lleva a una solución, retrocedemos
+			bc.Hechos = bc.Hechos[:len(bc.Hechos)-1]
+		}
+	}
+	return false
+}
+
+// Función para verificar si es seguro colocar una reina en la posición (fila, col)
+func (bc *BaseConocimiento) esSeguro(fila, col, n int) bool {
+	for _, h := range bc.Hechos {
+		if h.Nombre == "reina" {
+			otraFila, otraCol := h.Args[0], h.Args[1]
+			// Verificar si están en la misma columna o en la misma diagonal
+			if otraCol == col || (otraFila-otraCol == fila-col) || (otraFila+otraCol == fila+col) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// Función para imprimir el tablero
+func (bc *BaseConocimiento) ImprimirTablero(n int) {
+	for fila := 0; fila < n; fila++ {
+		for col := 0; col < n; col++ {
+			seguro := true
+			for _, h := range bc.Hechos {
+				if h.Nombre == "reina" && h.Args[0] == fila && h.Args[1] == col {
+					fmt.Print("Q ")
+					seguro = false
+					break
+				}
+			}
+			if seguro {
+				fmt.Print(". ")
+			}
+		}
+		fmt.Println()
+	}
+}
+
+/*
+func main() {
+	// Crear una nueva base de conocimiento
+	bc := NuevaBaseConocimiento()
+
+	// Resolver el problema de las 4 reinas
+	n := 18
+	if bc.ResolverNReinas(n) {
+		fmt.Println("Solución encontrada:")
+		bc.ImprimirTablero(n)
+	} else {
+		fmt.Println("No se encontró solución.")
+	}
+}
+*/

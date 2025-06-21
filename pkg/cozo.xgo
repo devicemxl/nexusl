@@ -1,0 +1,65 @@
+package main
+
+import (
+	"fmt"
+	"log"
+	"os"            // Necesario para eliminar el archivo de la DB para un ejemplo limpio
+	"path/filepath" // Para manejar rutas de archivos
+
+	"github.com/cozodb/cozo-go" //
+)
+
+const dbPath = "./my_cozodb_data.cozo" // Ruta al archivo de la base de datos
+
+func main() {
+	// Limpiar cualquier archivo de DB anterior para un inicio limpio en el ejemplo
+	// (¡No hagas esto en producción si quieres persistir datos!)
+	if _, err := os.Stat(dbPath); err == nil {
+		fmt.Printf("Eliminando DB anterior en: %s\n", dbPath)
+		if err := os.RemoveAll(dbPath); err != nil { // cozoDB puede crear un directorio
+			log.Fatalf("Error al eliminar DB anterior: %v", err)
+		}
+	} else if !os.IsNotExist(err) {
+		log.Fatalf("Error al verificar existencia de DB: %v", err)
+	}
+
+	// 1. Iniciar una base de datos persistente.
+	// Debes proporcionar un `DbOptions` con la ruta al archivo.
+	dbOptions := &cozo.DbOptions{ //
+		Path: dbPath, //
+	}
+	db, err := cozo.NewCozoDb(dbOptions) //
+	if err != nil {
+		log.Fatalf("Error al inicializar la DB persistente: %v", err)
+	}
+	// Importante: Asegúrate de cerrar la base de datos cuando termines.
+	defer func() {
+		if err := db.Close(); err != nil { //
+			log.Printf("Error al cerrar la DB persistente: %v", err)
+		}
+		fmt.Println("DB persistente cerrada.")
+	}()
+
+	fmt.Printf("DB de CozoDB iniciada persistentemente en: %s\n", filepath.Abs(dbPath))
+
+	// Aquí puedes empezar a usar la base de datos:
+	// Insertar un hecho (esto se guardará en disco):
+	_, err = db.RunQuery("insert {(\"Maria\", 25)} into people", nil) //
+	if err != nil {
+		log.Fatalf("Error al insertar datos: %v", err)
+	}
+	fmt.Println("Dato insertado: ('Maria', 25) en 'people'.")
+
+	// Consultar datos:
+	res, err := db.RunQuery("?[name, age] := people(name, age)", nil) //
+	if err != nil {
+		log.Fatalf("Error al consultar datos: %v", err)
+	}
+
+	fmt.Println("\nResultados de la consulta:")
+	for _, row := range res.Rows { //
+		fmt.Printf("Nombre: %v, Edad: %v\n", row[0], row[1]) //
+	}
+
+	fmt.Println("\nAhora, si ejecutas este programa de nuevo, 'Maria' debería seguir ahí.")
+}

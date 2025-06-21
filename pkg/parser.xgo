@@ -1,0 +1,105 @@
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+type Symbol any
+
+type ConditionProperty struct {
+	Condition string
+	Value     Symbol
+}
+
+type VerbProperty struct {
+	Name  string
+	Value Symbol // Puede ser ConditionProperty, string, etc.
+}
+
+type Triplet struct {
+	Subject  string
+	AuxVerb  string
+	CondName string
+}
+
+func Parse(input string) ([]Triplet, error) {
+	// Dividir por ';' para separar instrucciones
+	instrs := strings.Split(input, ";")
+	var triplets []Triplet
+	for _, instr := range instrs {
+		instr = strings.TrimSpace(instr)
+		if instr == "" {
+			continue
+		}
+		t, err := ParseInstruction(instr)
+		if err != nil {
+			return nil, err
+		}
+		triplets = append(triplets, t)
+	}
+	return triplets, nil
+}
+
+func ParseInstruction(instr string) (Triplet, error) {
+	parts := strings.Fields(instr)
+	if len(parts) < 3 {
+		return Triplet{}, fmt.Errorf("instrucción inválida: %q", instr)
+	}
+
+	subject := parts[0]
+	/*
+	   SI EL VERBO TIENE UN SOLO ELEMENTO ES UNA TRIPLET DECLARATIVA
+
+	   entonces
+	   no triene atributo
+	   o bien
+	   No tiene verbo
+
+	*/
+	// -----------------------
+	// Parse auxVerb + verb
+	// -----------------------
+	auxParts := strings.SplitN(parts[1], ":", 2)
+	var auxVerb string
+	if len(auxParts) == 2 {
+		auxVerb = auxParts[0]
+	} else if len(auxParts) < 2 {
+		auxVerb = ""
+	} else {
+		return Triplet{}, fmt.Errorf("verbo inválido: %q", parts[1])
+	}
+
+	// -----------------------
+	// Parse condition:value
+	// -----------------------
+	condParts := strings.SplitN(parts[2], ":", 2)
+	var condName string
+	if len(condParts) == 2 {
+		condName = condParts[0]
+	} else if len(condParts) < 2 {
+		condName = ""
+	} else {
+		return Triplet{}, fmt.Errorf("verbo inválido: %q", parts[1])
+	}
+
+	return Triplet{
+		Subject:  subject,
+		AuxVerb:  auxVerb,
+		CondName: condName,
+	}, nil
+}
+
+func main() {
+	line := "sensorA has color"
+	t, err := ParseInstruction(line)
+	if err != nil {
+		fmt.Println("Error parseando:", err)
+		return
+	}
+
+	fmt.Printf("Triplet parseado: %+v\n", t)
+	fmt.Printf("%s\n", t.Subject)
+	fmt.Printf("%s\n", t.AuxVerb)
+	fmt.Printf("%s\n", t.CondName)
+}
