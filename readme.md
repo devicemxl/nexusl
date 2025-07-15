@@ -1,106 +1,173 @@
-<center>
+<center\>
 
-# NexusL 
+# NexusL
 
-<strong>*Code is knowledge and knowledge is code*.</strong>
+**Code is knowledge and knowledge is code.**
 
-</center>
+</center\>
 
+This repository contains the design and initial implementation of NexusL, a Domain-Specific Language for Knowledge and Inference, built upon the **triplet (subject, predicate, object)** representation paradigm.
 
-Este repositorio contiene el diseño y la implementación inicial de NexusL, un Lenguaje de Dominio Específico para Conocimiento e Inferencia, bajo el paradigma de representación en tripletas (sujeto, predicado, objeto).
+NexusL is engineered to enable advanced hybrid and distributed artificial intelligence, serving as a powerful **digital twin tool** and an **intelligent wrapper for Large Language Models (LLMs)**. It aims to bridge the gap between structured knowledge, complex computations, and the vast capabilities of natural language AI.
 
-## Objetivos de Diseño de NexusL
+## NexusL Design Objectives
 
-* **Todo se expresa como tripletas:** 
-    - Cada unidad de conocimiento es una estructura `(sujeto predicado objeto)`. El objeto puede ser un literal (número, string, booleano), un símbolo, una acción invocable, o una referencia a otra tripleta/estructura.
-* **Sintaxis basada en S-expressions (estilo Lisp):** 
-    - Aprovechando la homoiconicidad para una representación de código como datos; *Code is knowledge and knowledge is code*.
-* **Enfoque declarativo:** La base del conocimiento es dinámica y evoluciona con el tiempo.
-* **Capacidad de actuar sobre el mundo:** Permitir la ejecución de acciones además de la mera representación de hechos.
-* **Homoiconicidad:** El código es dato, facilitando la metaprogramación y la manipulación del lenguaje.
-* **Inferencia lógica tipo Prolog:** Unificación, reglas, y encadenamiento (backward y forward).
-* **Expresividad matemática:** Soporte para aritmética básica y extendida.
-* **Distinción entre hechos, acciones y funciones:** Claridad en el modelo de conocimiento.
-* **Modelo generalista:** No limitado a ontologías o dominios fijos, buscando ser extensible.
+  * **Everything is expressed as Triplets:**
+      * Every unit of knowledge is a `Subject Predicate Object` structure. The object can be a literal (number, string, boolean), a symbol, an invocable action, or a reference to another triplet/structure.
+  * **Non-Parenthetical Syntax (Lisp-inspired):**
+      * Leveraging homoiconicity for code-as-data representation. This allows for powerful metaprogramming and language manipulation where **Code is knowledge and knowledge is code**. We aim for a syntax that avoids traditional parentheses for grouping, relying on indentation or keywords for structure.
+  * **Declarative Focus:** The knowledge base is dynamic and evolves over time.
+  * **Capability to Act on the World:** Enabling the execution of actions beyond mere fact representation.
+  * **Homoiconicity:** Code is data, facilitating metaprogramming and language manipulation.
+  * **Prolog-like Logical Inference:** Incorporating unification, rules, and both backward and forward chaining.
+  * **Mathematical Expressiveness:** Core support for basic and extended arithmetic.
+  * **Clear Distinction:** A precise model distinguishing between facts, actions, and functions.
+  * **Generalist Model:** Not confined to fixed ontologies or domains, designed for extensibility.
 
-## Estrategia de Desarrollo y Herramientas
+-----
 
-La implementación de NexusL se realizará en Go, aprovechando sus capacidades para el desarrollo de compiladores e intérpretes. El proceso se dividirá en fases incrementales para asegurar una base sólida y una integración modular de funcionalidades avanzadas.
+## Development Strategy & Tooling
 
-### Fase 1: El Núcleo Homoicónico y la Representación de Tripletas (Go)
+NexusL's implementation will leverage **Nim**, chosen for its unparalleled blend of high-performance compilation to C/C++/Objective-C, static typing, and robust interoperability with low-level libraries. This ensures an optimal foundation for computationally intensive tasks, addressing the challenges faced in previous iterations. The development process is structured into incremental phases, ensuring a solid base and modular integration of advanced functionalities.
 
-En esta fase inicial, nos centraremos en la creación de la infraestructura fundamental del lenguaje, incluyendo el análisis léxico, sintáctico, la representación de datos en memoria y un evaluador básico.
+### Phase 1: The Homoiconic Core & Triplet Representation (Nim)
 
-* **Lenguaje Base:** **Go**
-* **Componentes Clave:**
-    * **Definición de la `Tripleta`:** La unidad fundamental de conocimiento.
-    * **Lexer (Analizador Léxico):** Convertirá el código fuente (S-expressions) en tokens.
-    * **Parser (Analizador Sintáctico):** Construirá el Árbol de Sintaxis Abstracta (AST) a partir de los tokens, reflejando la homoiconicidad.
-    * **Evaluador/Intérprete Básico:** Procesará el AST para almacenar hechos simples y ejecutar funciones nativas (built-ins).
-    * **Sistema de Almacenamiento:** Una estructura de datos en memoria para la base de conocimiento inicial.
+This initial phase focuses on establishing the fundamental language infrastructure, including lexical analysis, parsing, in-memory data representation, and a basic evaluator.
 
-### Fase 2: Inferencia Lógica y Variables (Integración de Prolog/Datalog)
+  * **Base Language:** **Nim**
+  * **Core Components:**
+      * **Triplet Definition:** The fundamental unit of knowledge (`Subject Predicate Object`).
+      * **`NliSymbol` with Embeddings:** Each symbol will be defined with a unique ID and enriched with a semantic vector embedding. These embeddings will be efficiently generated by "mini" Large Language Models (LLMs) via **ONNX Runtime**, enabling reasoning based on semantic similarity.
+      * **Lexer (Lexical Analyzer):** Converts source code (non-parenthetical, Lisp-inspired expressions) into tokens.
+      * **Parser (Syntactic Analyzer):** Constructs the Abstract Syntax Tree (AST) from tokens, reflecting the language's homoiconicity and structural nesting without parentheses.
+      * **Basic Evaluator/Interpreter:** Processes the AST to store simple facts and execute native (built-in) functions.
+      * **Knowledge Storage & Logic Engine:** **CozoDB** will be integrated as the primary system for persistent storage of the triplet graph and for powerful Datalog-based rule inference.
+      * **Core Arithmetic & Boolean Algebra:** Implementation of fundamental arithmetic operations (`+`, `-`, `*`, `/`) and boolean logic (`AND`, `OR`, `NOT`) as built-in primitives.
 
-Una vez que el núcleo del lenguaje pueda manejar tripletas y S-expressions, se introducirá la capacidad de inferencia lógica.
+### Phase 2: Logical Inference & Variables
 
-* **Motor de Inferencia:** Se priorizará una implementación propia de los algoritmos de unificación y resolución (SLD Resolution) en Go para un control total y una comprensión profunda.
-* **Manejo de Variables:** Introducción de tipos de términos para variables lógicas.
-* **Reglas Lógicas:** Definición y procesamiento de reglas para la inferencia.
-* **Sintaxis para Reglas y Consultas:** Extensión del lenguaje para definir y consultar reglas.
+Once the core can handle triplets and expressions, the capability for logical inference will be introduced.
 
-### Fase 3: Expresividad Matemática y Acciones/Reactivity
+  * **Inference Engine:** Leveraging **CozoDB's Datalog engine** for powerful, declarative logical inference over the triplet graph. This provides robust unification, resolution, and chaining capabilities.
+  * **Variable Handling:** Introduction of terms for logical variables within triplet patterns.
+  * **Logical Rules:** Definition and processing of rules for complex inference, expressed within NexusL's syntax and managed by CozoDB.
+  * **Query Syntax:** Extension of the language for defining and querying logical rules and facts.
 
-Esta fase se enfocará en enriquecer la expresividad del lenguaje y su capacidad para interactuar con el "mundo".
+### Phase 3: Mathematical Expressiveness & Actions/Reactivity
 
-* **Expresividad Matemática:** Implementación de operaciones aritméticas y funciones matemáticas como built-ins.
-* **Acciones Invocables y Efectos Secundarios:** Mecanismos claros para distinguir y ejecutar acciones con efectos sobre el entorno.
-* **Reactivity:** Introducción de patrones para la reactividad, como observadores, encadenamiento hacia adelante (forward chaining) y manejo de eventos.
+This phase will enhance the language's expressiveness and its ability to interact with the "world."
 
-### Consideraciones Adicionales
+  * **Advanced Mathematical Expressiveness:** Implementation of extended arithmetic operations and advanced mathematical functions as built-ins.
+  * **Invokable Actions & Side Effects:** Clear mechanisms to define, distinguish, and execute actions that have effects on the environment.
+  * **Reactivity:** Introduction of patterns for reactive behaviors, such as observers, forward chaining, and event handling, allowing agents to respond dynamically to changes in the triplet knowledge base (digital twin state).
 
-* **Namespaces:** Un sistema para organizar y evitar colisiones de nombres.
-* **Metadatos:** Posibilidad de asociar metadatos a las tripletas (ej. fuente, confianza).
-* **Error Handling y Debugging:** Mecanismos robustos para el manejo de errores y la depuración del código.
+### Additional Considerations
 
-## Estructura de Directorios Propuesta Inicialmente
+  * **Namespaces:** A robust system for organizing and preventing naming collisions within the knowledge graph.
+  * **Metadata:** Ability to associate metadata with triplets (e.g., source, confidence levels, timestamps).
+  * **Error Handling & Debugging:** Robust mechanisms for error reporting and debugging.
 
-La siguiente estructura facilita la modularidad y el desarrollo organizado:
+-----
+
+## NexusL Architecture: The Smart Glue for Digital Twins & LLMs
+
+NexusL is designed as a highly modular and extensible platform for distributed AI and digital twins. To understand its architecture, it's crucial to differentiate between its **Core**, specialized **Libraries**, and higher-level **Modules**. While all components contribute to the system's intelligence, they operate at different layers of abstraction and fulfill distinct technical roles. NexusL serves as the **intelligent orchestrator**, providing dynamic, structured context for external Large Language Models (LLMs) and enabling robust digital twin functionality.
+
+-----
+
+### 1\. The Core: The Foundational Language & Knowledge Kernel
+
+The **Core** of NexusL represents the absolute minimum set of functionalities required for the language to exist and for its fundamental paradigm to operate. It is the bedrock upon which all other components are built, forming the "brain" that structures knowledge and orchestrates behavior.
+
+  * **Technical Role:** Defines the language's syntax, fundamental data model, basic computational primitives, and the primary knowledge storage mechanism. It's the "runtime" of NexusL, handling the most atomic operations and providing the foundational context layer for all intelligent processes.
+  * **Key Characteristics:**
+      * **Immutability/Stability:** Changes to the Core are rare and have wide-ranging implications, as it forms the lowest layer of the dependency stack.
+      * **High Performance:** Operations within the Core are highly optimized, as they are fundamental to every aspect of NexusL.
+      * **Language-Specific:** Directly implements NexusL's unique non-parenthetical triplet syntax and symbolic representation.
+      * **Resource Management:** Manages fundamental data structures and their memory lifecycle (e.g., `NliSymbol` allocation).
+  * **NexusL Core Components:**
+      * **Triplet Structure:** The immutable `Subject Predicate Object` pattern serves as the universal data representation, modeling all knowledge, relationships, and actions.
+      * **`NliSymbol` & Embeddings:** The atomic unit of knowledge, represented by a unique string ID and critically enriched with a **semantic vector embedding**. These embeddings are efficiently generated by "mini" LLMs (optimized with ONNX Runtime), endowing symbols with contextual understanding for semantic similarity and dynamic context creation.
+      * **Basic Data Types:** Primitives like strings, integers, floats, and booleans, wrapped within the `NliValue` polymorphic type.
+      * **Basic Arithmetic & Boolean Algebra:** Fundamental mathematical (`+`, `-`, `*`, `/`) and logical (`AND`, `OR`, `NOT`) operations on these primitive values, serving as built-in functions for elementary computation.
+      * **CozoDB Integration:** The primary, low-level interface to **CozoDB** for persistent storage of the triplet graph and the execution of Datalog rules. This establishes the foundational, dynamic knowledge graph and declarative logical inference capabilities.
+
+-----
+
+### 2\. Libraries: Domain-Specific Toolkits & Optimized Routines
+
+**Libraries** in NexusL are collections of specialized functions, data types, and algorithms designed to efficiently solve problems within specific technical domains. They extend the Core's basic computational capabilities, providing high-performance tools that operate on structured data.
+
+  * **Technical Role:** Provide optimized implementations for complex mathematical, statistical, or I/O-bound operations common across various applications. They abstract away low-level details (like FFI calls to C/Fortran) and present a high-performance API.
+  * **Key Characteristics:**
+      * **Domain-Specific:** Focus on a particular area (e.g., linear algebra, signal processing, web communication).
+      * **Performance-Critical:** Often leverage external highly optimized C/Fortran libraries (like BLAS/LAPACK) via Nim's FFI, or implement battle-tested algorithms directly in Nim.
+      * **Reusable:** Designed to be used independently or as building blocks by various Modules or user applications.
+      * **Lower-Level Abstraction:** While higher than the Core, they are generally concerned with *how* a specific computation is performed efficiently, rather than *why* it's performed in the context of an AI agent's reasoning.
+  * **NexusL Library Examples:**
+      * **Numerical Computing & Linear Algebra:** Heavily utilizing **Arraymancer**, this library provides `Tensor` types and high-performance operations for vectors and matrices. It's crucial for digital twin sensor data analysis, signal processing (e.g., `ruptures` detection), and any complex mathematical modeling, offering performance comparable to C/Fortran (BLAS/LAPACK) implementations.
+      * **Statistical Computation:** A library offering common statistical functions (mean, variance, distributions, hypothesis testing) built on top of the numerical computing base. This is essential for digital twin monitoring, anomaly detection, and predictive analytics.
+      * **Communication & Networking:** Libraries for HTTP, WebSockets, or IoT protocols (e.g., MQTT), allowing NexusL agents to interact with web services, external APIs, and physical sensors, feeding real-world data into the digital twin's knowledge base.
+
+-----
+
+### 3\. Modules: High-Level AI Capabilities & Reasoning Paradigms
+
+**Modules** represent the higher-level "intelligent" components of NexusL. They orchestrate interactions between Core functionalities, Libraries, and external services (like cloud-based LLMs) to implement complex AI paradigms and advanced reasoning capabilities. These modules define the "brains" of the digital twin, enabling it to reason, learn, and act.
+
+  * **Technical Role:** Encapsulate specific AI reasoning engines, define agent behaviors, manage dynamic state, and integrate sophisticated external models. They define *why* and *how* different pieces of knowledge and computation are combined for intelligent behavior and context generation.
+  * **Key Characteristics:**
+      * **Paradigm-Specific:** Each module often implements a distinct AI paradigm (e.g., symbolic reasoning, reactive systems, neural integration, uncertainty management).
+      * **Orchestration:** Combine functionalities from the Core and various Libraries to achieve their goals, translating high-level concepts into executable operations.
+      * **Contextual Awareness:** Deal with the dynamic state of the digital twin, agent goals, and complex decision-making processes, often leveraging the semantic richness of `NliSymbol`s.
+      * **Higher-Level Abstraction:** Focus on the "intelligence" aspect, building on top of the efficient operations provided by Libraries and the Core.
+  * **NexusL Module Examples:**
+      * **State & Reactivity:** A module allowing agents to subscribe to changes in the triplet graph (via CozoDB events) and trigger actions based on observed state transitions. This forms the basis of dynamic digital twin behaviors and intelligent agent responses.
+      * **Logical Reasoning:** Builds on CozoDB's Datalog engine, providing NexusL-specific constructs for defining and executing complex logical rules and inferring new facts within the triplet knowledge base. This module enables transparent and auditable reasoning pathways.
+      * **LLM Integration:** This pivotal module manages the interface with **external Large Language Models** (e.g., Google's AI Lab, OpenAI, Claude). It's responsible for **dynamic prompt engineering**, intelligently selecting and structuring relevant context from the NexusL triplet graph (leveraging `NliSymbol` embeddings for semantic retrieval), sending it to the LLM, and then parsing the LLM's natural language output back into structured triplets for the knowledge base. NexusL acts as the "smart glue," providing the LLM with a highly relevant and structured memory and domain-specific knowledge.
+      * **Neutrosophic Logic & Cognitive Maps:** Implements advanced reasoning with uncertainty, vagueness, and indeterminacy (using concepts like Fermatean Neutrosophic Sets and Cognitive Maps). This module interprets and propagates uncertainty values attached to triplets, crucial for digital twins operating with noisy or incomplete real-world data.
+      * **Symbolic Computation Module:** While it might utilize numerical libraries for some aspects, this module focuses on the symbolic manipulation of algebraic and logical expressions (e.g., derivation, simplification, equation solving) as an intrinsic "dialect" of NexusL. It extends NexusL's reasoning capabilities beyond numerical computation.
+
+-----
+
+### Directory Structure (Proposed for Nim)
+
+The following structure facilitates modularity and organized development, adapted for Nim's conventions:
 
 ```
 nexusl/
-├── cmd/
-│   └── nexusl/
-│       └── main.go       // Punto de entrada del intérprete/CLI (REPL)
-├── pkg/
+├── src/
+│   ├── nexusl.nim             // Main entry point for the interpreter/CLI (REPL)
+│   ├── core/
+│   │   ├── types.nim          // Fundamental NliSymbol, NliValue, Triplet definitions
+│   │   └── evaluator.nim      // Core interpreter/evaluator logic
+│   │   └── builtins.nim       // Implementation of core arithmetic & boolean built-ins
+│   │   └── codb_interface.nim // Low-level interface to CozoDB
+│   │   └── onnx_interface.nim // Low-level interface for ONNX Runtime for embeddings
 │   ├── ast/
-│   │   └── ast.go        // Definiciones del Árbol de Sintaxis Abstracta (AST)
-│   │   └── expressions.go
-│   │   └── literals.go 
-│   │   └── statlements.go 
-│   ├── compiler/         // Empty
-│   ├── db/               // Empty
-│   ├── evaluator/
-│   │   └── evaluator.go  // Intérprete/Evaluador principal del AST
-│   │   └── store
-│   │   |   └── store.go  // Almacén de conocimiento en memoria (hechos)
-│   │   └── environment
-│   │       └── environment.go // Contexto de ejecución (variables, namespaces)
+│   │   └── nodes.nim          // Abstract Syntax Tree (AST) node definitions
 │   ├── lexer/
-│   │   └── lexer.go      // Analizador Léxico (scanner)
-│   ├── object/           // Representación de los tipos de datos de NexusL en tiempo de ejecución
-│   │   └── builtin.go    // Implementación de funciones nativas (built-ins)
-│   │   └── literals.go   // 
-│   │   └── object.go     // Definición de Term, Tripleta, etc. como objetos de runtime
-│   │   └── symbols.go    // 
-│   │   └── triplet.go    // 
+│   │   └── lexer.nim          // Lexical Analyzer (scanner)
 │   ├── parser/
-│   │   └── parser.go     // Analizador Sintáctico (parser)
-│   ├── inference/        // Componentes para la inferencia lógica
-│   ├── compiler/         // (Opcional, para fases posteriores: compilación a bytecode)
-│   └── util/             // Utilidades generales
-├── tests/                // Directorio para pruebas unitarias e integración
+│   │   └── parser.nim         // Syntactic Analyzer (parser)
+│   ├── libs/                  // Specialized Libraries
+│   │   ├── math/              // Numerical, Linear Algebra, Statistical Computation
+│   │   │   ├── tensors.nim    // Arraymancer integration
+│   │   │   ├── stats.nim      // Statistical functions
+│   │   │   └── signal.nim     // Signal processing, e.g., 'ruptures' implementation
+│   │   ├── comms/             // Communication & Networking functions
+│   │   │   ├── web.nim        // HTTP, WebSockets
+│   │   │   └── iot.nim        // MQTT, sensor protocols
+│   ├── modules/               // High-Level AI Capabilities & Reasoning
+│   │   ├── state/             // Reactive state management
+│   │   ├── logic/             // Logical rules and inference (Datalog interaction)
+│   │   ├── llm/               // LLM integration and context management
+│   │   ├── neutrosophic/      // Neutrosophic logic and FNCM
+│   │   └── symbolic/          // Symbolic computation dialect
+│   └── util/                  // General utilities
+├── tests/                     // Directory for unit and integration tests
 │   └── ...
-├── go.mod                // Módulo Go (gestionado por `go mod`)
-├── go.sum                // Sumas de verificación de módulos
-└── README.md             // Este archivo
+├── config/                    // Configuration files (e.g., CozoDB connection)
+├── nexusl.nimble              // Nimble package file (dependencies, tasks)
+└── README.md                  // This file
 ```

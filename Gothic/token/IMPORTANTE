@@ -1,0 +1,19 @@
+2025/07/11 4:57 AM
+LOS ARCHIVOS ESTAN AL REVES TKEN Y KWORDS
+HAY QUE REVISAR!!!
+---
+2025/07/13
+REVISADO
+---
+2025/07/13
+TokenClass de SYMBOLS & KW QUEDARON EN token/tokens.go
+map[string]TokenClass de KW quedo en token/keywords.go
+func (l *Lexer) Ensambladora() { tk.Token string de todos los symbols quedo en lexer/Ensambladora.go
+---
+25/07/13 8:33
+ELIMINO TOKENS DUPLICADOS
+---
+25/07/13 06:27
+He  completado con éxito el primer milestone del proyecto nexusL: 
+"Implementar el Lexer para las tripletas simples y de referencia."
+
