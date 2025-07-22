@@ -1,0 +1,133 @@
+## **Flujo Completo Esperado: Tripletas fact Simples** 
+
+Aquí está el camino que una sentencia fact seguirá desde que la escribes hasta que se almacena en tu Base de Conocimientos:
+
+### **1\. Código Fuente (Input)**
+
+El usuario escribe una sentencia fact en el lenguaje nLi:
+
+Fragmento de código
+
+fact Car is symbol;  
+fact Robot location "kitchen";  
+fact David hasAge 42;
+
+### **2\. Lexer (Gothic/lexer)**
+
+* **Propósito:** Convertir la cadena de texto en una secuencia de **tokens**.  
+* **Proceso:** El lexer.Lexer (usando Ensambladora()) lee el input carácter por carácter y agrupa secuencias de caracteres en unidades significativas (tokens). Cada token tiene un Type (ej. FACT\_KEYWORD, IDENTIFIER, STRING, INT, SEMICOLON) y un Word (el texto original).  
+* **Ejemplo:** fact Car is symbol; se convierte en:  
+  * Token{Type: FACT\_KEYWORD, Word: "fact"}  
+  * Token{Type: IDENTIFIER, Word: "Car"}  
+  * Token{Type: IS, Word: "is"}  
+  * Token{Type: SYMBOL, Word: "symbol"}  
+  * Token{Type: SEMICOLON, Word: ";"}
+
+### **3\. Parser (Gothic/parser)**
+
+* **Propósito:** Tomar la secuencia de tokens y construir un **Árbol de Sintaxis Abstracta (AST)** que represente la estructura gramatical del programa.  
+* **Proceso:** El parser.Parser (usando ParseProgram()) consume los tokens, aplicando las reglas gramaticales definidas para el lenguaje. Para cada sentencia fact, crea un nodo ast.FactStatement y lo llena con nodos ast.Expression para el sujeto, predicado y objeto. También utiliza el **metamodelo** para resolver el scope (fact en este caso).  
+* **Ejemplo:** La secuencia de tokens se transforma en un ast.Program que contiene un ast.FactStatement con:  
+  * Scope: Referencia al ds.Symbol de fact (Type: TripletScope).  
+  * Subject: ast.Identifier{Value: "Car"}  
+  * Predicate: ast.Identifier{Value: "is"}  
+  * Object: ast.Identifier{Value: "symbol"}
+
+### **4\. Evaluador / Semánticas (Gothic/evaluator \- *Nuevo Componente*)**
+
+* **Propósito:** Procesar el AST para realizar acciones significativas, como almacenar tripletas en la Base de Conocimientos, ejecutar acciones, o resolver queries. Esta es la fase donde el lenguaje cobra vida.  
+* **Proceso:**  
+  * El evaluador recorrería el ast.Program (los ast.Statements).  
+  * Para cada ast.FactStatement:  
+    * Extraería los valores del Sujeto, Predicado y Objeto del AST. Estos valores pueden ser de diferentes tipos (string, int, float, boolean, symbol, etc.).  
+    * Normalizaría y validaría estos valores si es necesario.  
+    * Construiría una estructura de datos Triplet (definida en el lado de Nim o como un objeto común que pueda ser serializado).  
+    * Llamaría a la **interfaz de la Base de Conocimientos** para almacenar esta tripleta.  
+* Ejemplo: El ast.FactStatement se convierte en una llamada a una función Nim (vía FFI si es un binario Go) o directamente si el evaluador se compila con Nim:  
+  KB.add\_triple(Subject("Car"), Predicate("is"), Object("symbol"))
+
+### **5\. Base de Conocimientos (Nim / SQLite \- *Componente Principal*)**
+
+* **Propósito:** Almacenar de forma persistente las tripletas y proporcionar una interfaz para consultarlas y manipularlas.  
+* **Tecnología:** Utilizarías SQLite (a través de una biblioteca Nim) para la persistencia. La Base de Conocimientos en sí sería un módulo Nim que encapsula las operaciones con la base de datos.  
+* **Esquema de DB Simplificado:** Una tabla triplets podría verse así:  
+  SQL  
+  CREATE TABLE triplets (  
+      id INTEGER PRIMARY KEY AUTOINCREMENT,  
+      subject\_value TEXT NOT NULL,  
+      subject\_type TEXT NOT NULL, \-- ej. "Identifier", "String", "Symbol"  
+      predicate\_value TEXT NOT NULL,  
+      predicate\_type TEXT NOT NULL, \-- ej. "Identifier", "IsKeyword", "HasPredicate"  
+      object\_value TEXT NOT NULL,  
+      object\_type TEXT NOT NULL    \-- ej. "Identifier", "String", "Int", "Symbol"  
+  );
+
+* **Persistencia:** La función add\_triple de la KB insertaría la tripleta en la tabla triplets.
+
+---
+
+## **Consideraciones Clave para el Futuro**
+
+### **1\. Manejo de Errores**
+
+El manejo de errores ya lo estás haciendo bien en el parser (recopilando p.errors). Este enfoque debe extenderse:
+
+* **Lexer:** Errores de caracteres ilegales.  
+* **Parser:** Errores sintácticos (token inesperado, estructura incorrecta). Ya lo estás haciendo.  
+* **Evaluador:**  
+  * **Errores semánticos:** Por ejemplo, intentar ejecutar una acción con argumentos de tipo incorrecto (ej. robot move "cocina" si move espera una ubicación estructurada).  
+  * **Errores de KB:** Fallos al interactuar con la base de datos (conexión, restricciones de integridad).  
+* **Reporte Unificado:** Un sistema para recopilar y reportar todos los errores de manera clara al usuario, indicando línea y columna.
+
+### **2\. Pruebas Automatizadas**
+
+¡Absolutamente esencial\! Ya tienes TestLookupIdent. Necesitarás:
+
+* **Pruebas de Lexer:** Asegurar que todos los tokens se generen correctamente para varias entradas.  
+* **Pruebas de Parser/AST:** Verificar que el AST se construye correctamente para diferentes sentencias (incluyendo casos válidos e inválidos).  
+  * **"Golden File" Testing:** Para el parser, una técnica útil es generar el String() de un AST parseado y compararlo con un archivo de texto predefinido ("golden file"). Si el String() del AST es el esperado, el parseo es correcto.  
+* **Pruebas de Evaluador:** Verificar que las tripletas se insertan correctamente en la KB y que las acciones se ejecutan como se espera.  
+* **Pruebas de Integración:** Probar el flujo completo desde el input de texto hasta la KB.
+
+### **3\. Verificación de Existencia de Symbols en la KB**
+
+Tu metamodelo ya gestiona los símbolos del sistema (fact, is, symbol). La KB también puede actuar como un registro de símbolos definidos por el usuario o tipos de entidades:
+
+* Cuando el evaluador encuentra fact Car is symbol;:  
+  * Podría verificar si "Car" ya existe como una Symbol en la KB o si debe crearse (con un ThingType Instance o Identifier).  
+  * Podría verificar si "symbol" es un ThingType conocido o si se está definiendo uno nuevo.  
+* Esto ayuda a mantener la integridad y la "ontología" básica de tu sistema. Podrías tener un "Symbol Table" persistente en la KB.
+
+### **4\. Consistencia Semántica ("horse has::tires how::r14;")**
+
+Esta es una de las áreas más fascinantes y complejas, y te acerca mucho al ámbito de la Web Semántica y la IA.
+
+* **Nivel Básico (Esquema Simple):** Podrías tener reglas muy básicas:  
+  * Restricciones de tipo de predicado: is solo puede tomar SYMBOL como objeto. hasAge solo puede tomar INT.  
+  * Esto se implementaría en el **evaluador** o incluso en la capa de la **KB en Nim**, validando antes de la inserción.  
+* **Nivel Avanzado (Inferencia/Ontología):** Esto es lo que hace OWL.  
+  * **Definiciones de Clase:** Podrías definir Class Horse subtype of Animal o Class Wheel propertyOf Vehicle.  
+  * **Propiedades y Restricciones:** hasTires (propiedad) domain Vehicle, range Tire. Si intentas horse hasTires X, el sistema sabría que horse no es del domain Vehicle y reportaría una inconsistencia.  
+  * **Inferencia:** Si fact Ferrari is Car; y Car hasWheel 4;, el sistema podría inferir que Ferrari hasWheel 4;.  
+* **Cómo implementarlo:**  
+  * **Reglas en Nim:** Escribir reglas directamente en Nim que se activen en la inserción de tripletas o en la consulta.  
+  * **Motor de Reglas:** Integrar una biblioteca de motor de reglas Nim (si existe) o construir uno simple.  
+  * **Metamodelo Extendido:** Tu metamodel.MetamodelDefinitions podría expandirse para incluir estas reglas de consistencia semántica. Por ejemplo, al definir un predicado hasTires, podrías adjuntar propiedades como domain: Vehicle.
+
+Para el ejemplo horse has::tires how::r14;:
+
+1. **Lexer/Parser:** Lo convertirán en un FactStatement con predicados contextuales (has::tires, how::r14).  
+2. **Evaluador:**  
+   * Insertaría (horse, has::tires, r14) en la KB.  
+   * **Aquí entraría la validación semántica:** Si tienes una regla que dice domain(has::tires) \= Vehicle, el evaluador vería que horse no es un Vehicle y podría:  
+     * Rechazar la tripleta y emitir un error.  
+     * Advertir y permitirla (para casos como el caballito de madera).  
+     * Activar una pregunta al usuario (agente inteligente).
+
+La "consistencia semántica" es un objetivo a largo plazo fascinante que hará tu lenguaje muy potente, especialmente para agentes inteligentes. Por ahora, centrarse en la validación básica de tipos es un excelente punto de partida.
+
+---
+
+Espero que esta documentación te dé una visión clara del camino a seguir. El siguiente paso concreto en el código sería crear el paquete Gothic/evaluator y comenzar a procesar ese ast.Program para inyectar datos en una KB (inicialmente, quizás solo imprimiendo los datos para verificar, antes de conectarlo a SQLite).
+
+¿Te parece bien este plan?
